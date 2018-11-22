@@ -1,4 +1,4 @@
-#***********************************************************************************************************************
+***********************************************************************************************************************
 #This script does the following:
 #Connects to VCenter server.
 #Checks for Snapshot Alerts(Red Colour) in the VCenter. Ignores Snapshot warnings(Yellow).
@@ -12,18 +12,18 @@ param($VCenter)
 try{
 Add-Pssnapin vmware.vimautomation.core
 $c=Connect-VIServer -Server $VCenter -User "user" -Password "password" -ErrorAction "Stop" #Connects to VCenter
- 
+Â 
 $VMs=Get-View -ViewType VirtualMachine -Property Name,OverallStatus,TriggeredAlarmState,Snapshot -ErrorAction "Stop"
 $FaultyVMs=$VMs | where-object {$_.overallstatus -eq "RED"} #Get VMs that generated Red Alerts
 $count=0;
 foreach($FaultyVM in $FaultyVMs){
 foreach($TriggeredAlarm in $FaultyVM.triggeredalarmstate){
 $AlarmId=$TriggeredAlarm.alarm.tostring()
- 
- 
-$AlarmCheck=(Get-AlarmDefinition -id $AlarmId -ErrorAction "Stop").Name       
- 
- 
+Â 
+Â 
+$AlarmCheck=(Get-AlarmDefinition -id $AlarmId -ErrorAction "Stop").NameÂ Â Â Â Â Â  
+Â 
+Â 
 if($AlarmCheck -match "SNAPSHOT_VM")   #Check if the alert is due to snapshot
 {
 $count=$count+1;
@@ -33,7 +33,7 @@ if($Snapshot)
 {
 Write-Host "SNAPSHOT FOUND FOR VM $v : "
 (Get-Snapshot -VM $FaultyVM.Name -ErrorAction "Stop").Name    #List out snapshots in vm
-Remove-Snapshot $Snapshot -Confirm:$false -ErrorVariable $Remove  #Removes all snapshot
+Remove-Snapshot $Snapshot -Confirm:$false -ErrorVariable Remove  #Removes all snapshot
 if($Remove.count -gt 0) 
 {
 Write-Host "SNAPSHOT FOUND AND NOT DELETED FOR THE VM : $v "
@@ -43,26 +43,26 @@ else
 Write-Host "SNAPSHOT FOUND AND SUCCESSFULLY REMOVED FOR THE VM : $v "
 }
 
- 
+Â 
 }
 else
 {
 Write-Host "NO SNAPSHOT FOUND FOR THE VM : $v"
 }
- 
+Â 
 }
 if($count -le 0)
 {
- 
+Â 
 Write-Host "SNAPSHOT_VM ALERT NOT FOUND FOR THE VCENTER : $VCenter"
 }
 }
 }
- 
+Â 
 Disconnect-Viserver -Server $VCenter -confirm:$false  #disconnects VCenter
 }
 catch
 {
 $_.exception.message
- 
+Â 
 }
